@@ -1,0 +1,10 @@
+# executáveis
+*.exe
+*.out
+*.o
+
+# VS Code
+.vscode/
+
+# resultados
+results/*.csv
