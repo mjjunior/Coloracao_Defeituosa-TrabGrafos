@@ -1,0 +1,291 @@
+# EXPLICAÇÃO DO CÓDIGO - Trabalho de Coloração Defeituosa
+
+## Visão Geral
+
+Este documento explica passo a passo a estrutura e funcionamento do código desenvolvido para o problema de Coloração Defeituosa.
+
+## 1. TAD Grafo (Grafo.h e Grafo.cpp)
+
+### O que foi implementado:
+
+**Estrutura de dados:** Lista de adjacências usando `vector<vector<int>>`
+- Armazena para cada vértice uma lista de seus vizinhos
+- Adequado para grafos não direcionados
+- Eficiente para percorrer vizinhos de um vértice
+
+**Métodos principais:**
+
+- `adicionarAresta(u, v)`: Adiciona aresta não direcionada (adiciona u na lista de v E v na lista de u)
+- `getAdjacentes(v)`: Retorna lista de vizinhos de um vértice
+- `getGrau(v)`: Retorna número de vizinhos (grau) de um vértice
+- `existeAresta(u, v)`: Verifica se existe aresta entre dois vértices
+- `lerArquivo(arquivo)`: Lê instância de arquivo no formato padrão
+- `exportarGraphEditor(arquivo)`: Exporta grafo para visualização online
+
+**Formato do arquivo de entrada:**
+```
+<número_vértices>
+<número_arestas>
+<u> <v>  # para cada aresta
+```
+
+## 2. Estrutura de Solução (ColoracaoDefeituosa.h)
+
+### Struct Solucao:
+
+```cpp
+struct Solucao {
+    vector<int> cores;          // cores[v] = cor atribuída ao vértice v
+    int numCores;               // Total de cores utilizadas
+    int numDeficiencias;        // Total de deficiências (arestas com mesma cor)
+    double tempoExecucao;       // Tempo em segundos
+    int alphaMelhor;            // Alpha que gerou melhor solução (para Reativo)
+    double mediaIteracoes;      // Média de cores em todas iterações
+};
+```
+
+## 3. Algoritmos Implementados
+
+### 3.1 Algoritmo Guloso
+
+**Estratégia:**
+1. Ordena vértices por grau DECRESCENTE (vértices com mais conexões primeiro)
+2. Para cada vértice na ordem:
+   - Tenta atribuir a MENOR cor possível que respeite a restrição d
+   - Se nenhuma cor existente serve, cria uma nova cor
+
+**Por que ordenar por grau decrescente?**
+- Vértices com mais conexões são mais "difíceis" de colorir
+- Colorindo-os primeiro, temos mais flexibilidade para os vértices restantes
+
+**Verificação da restrição d:**
+```cpp
+verificarRestricaoD(v, cor, cores):
+    - Conta quantos vizinhos de v já têm a cor 'cor'
+    - Verifica se esses vizinhos também não ultrapassariam d
+    - Retorna true se v pode usar essa cor
+```
+
+**Complexidade:** O(n² + nm) onde n = vértices, m = arestas
+
+### 3.2 Algoritmo GRASP (Guloso Randomizado Adaptativo)
+
+**Parâmetros:**
+- `alpha` (α): controla aleatoriedade (0.0 = guloso puro, 1.0 = totalmente aleatório)
+- `numIteracoes`: quantas soluções gerar
+
+**Estratégia:**
+1. **Fase Construtiva** (repete `numIteracoes` vezes):
+   - Enquanto houver vértices não coloridos:
+     a. Calcula grau de cada vértice não colorido
+     b. Define limiar: `limiar = grauMin + α * (grauMax - grauMin)`
+     c. Cria RCL (Lista Restrita de Candidatos) com vértices de grau ≥ limiar
+     d. Escolhe ALEATORIAMENTE um vértice da RCL
+     e. Colore o vértice com a menor cor possível
+
+2. **Guarda a melhor solução** encontrada em todas as iterações
+
+**RCL (Restricted Candidate List):**
+- Com α=0.0: RCL contém apenas vértices de grau máximo (comportamento guloso)
+- Com α=1.0: RCL contém todos os vértices (comportamento aleatório)
+- Com 0 < α < 1: Balanceia qualidade e diversidade
+
+**Exemplo de RCL:**
+```
+Vértices: graus = {5, 4, 4, 3, 2}
+α = 0.5
+grauMax = 5, grauMin = 2
+limiar = 2 + 0.5*(5-2) = 3.5
+RCL = {vértices com grau ≥ 3.5} = {5, 4, 4}
+Escolhe aleatoriamente um dos 3 primeiros
+```
+
+### 3.3 Algoritmo GRASP Reativo
+
+**Parâmetros:**
+- `numIteracoes`: número total de iterações
+- `tamBloco`: a cada quantas iterações atualizar probabilidades
+
+**Diferença do GRASP normal:**
+- GRASP: α é FIXO (você escolhe)
+- GRASP Reativo: α é ADAPTATIVO (aprende qual funciona melhor)
+
+**Estratégia:**
+1. Define conjunto de alphas: {0.0, 0.25, 0.5, 0.75, 1.0}
+
+2. Inicializa probabilidades UNIFORMES: cada α tem 20% de chance
+
+3. Para cada iteração:
+   - Seleciona α baseado nas probabilidades atuais
+   - Executa 1 iteração do GRASP com esse α
+   - Registra a qualidade (número de cores) obtida
+
+4. A cada `tamBloco` iterações:
+   - Calcula qualidade MÉDIA de cada α
+   - Atualiza probabilidades: quanto MENOR a qualidade média, MAIOR a probabilidade
+   - Fórmula: `prob[i] = (1/qualidadeMédia[i]) / Σ(1/qualidadeMédia[j])`
+
+**Exemplo de aprendizado:**
+```
+Iteração 0-9:
+  α=0.0 usado 2x, média=5 cores
+  α=0.25 usado 2x, média=4 cores  ← melhor!
+  α=0.5 usado 2x, média=6 cores
+  α=0.75 usado 2x, média=7 cores
+  α=1.0 usado 2x, média=8 cores
+
+Após bloco:
+  Probabilidades atualizadas:
+  α=0.25 terá maior probabilidade (pois teve menor média)
+  α=1.0 terá menor probabilidade (pois teve maior média)
+
+Iteração 10-19:
+  α=0.25 será escolhido com mais frequência
+  ...
+```
+
+## 4. Funções Auxiliares Importantes
+
+### calcularDeficiencias(cores)
+- Conta total de arestas onde ambos vértices têm a mesma cor
+- Percorre todas as arestas uma vez: O(m)
+
+### contarDeficienciasVertice(v, cores)
+- Conta quantos vizinhos de v têm a mesma cor que v
+- Usado para validar se solução respeita d
+
+### validarSolucao(sol)
+- Verifica se TODOS vértices foram coloridos
+- Verifica se NENHUM vértice tem mais de d deficiências
+- Retorna true se solução é válida
+
+## 5. Sistema de Resultados
+
+### Arquivo CSV (resultados.csv)
+
+Cada execução adiciona UMA LINHA com:
+- Data/hora da execução
+- Nome da instância
+- Algoritmo usado (Guloso/GRASP/Reativo)
+- Todos os parâmetros (d, α, iterações, etc.)
+- **Semente de randomização** (permite reproduzir resultados!)
+- Tempo de execução
+- Qualidade da solução (cores e deficiências)
+
+**Benefício:** Facilita análise comparativa e geração de gráficos
+
+### Geração de Semente
+
+```cpp
+unsigned int semente = time(0);  // timestamp atual
+srand(semente);                   // inicializa gerador
+cout << "Semente: " << semente;  // imprime para reprodução
+```
+
+**Para reproduzir um teste:** Use a semente impressa como parâmetro
+
+## 6. Interface de Linha de Comando
+
+### Modo Interativo (sem argumentos)
+```bash
+./coloracao
+```
+- Usa grafo de exemplo embutido no código
+- Menu interativo para escolher algoritmo
+
+### Modo Linha de Comando
+```bash
+# Guloso
+./coloracao grafo.txt 1 guloso
+
+# GRASP
+./coloracao grafo.txt 1 grasp 0.5 100
+
+# GRASP com semente específica
+./coloracao grafo.txt 1 grasp 0.5 100 12345
+
+# Reativo
+./coloracao grafo.txt 1 reativo 100 10
+
+# Reativo com semente específica
+./coloracao grafo.txt 1 reativo 100 10 67890
+```
+
+## 7. Complexidade dos Algoritmos
+
+### Guloso:
+- Ordenação: O(n log n)
+- Coloração: O(n * (n + m)) no pior caso
+- **Total: O(n² + nm)**
+
+### GRASP:
+- Cada iteração: O(n² + nm)
+- Com k iterações: **O(k * (n² + nm))**
+
+### Reativo:
+- Similar ao GRASP
+- Overhead adicional: O(|alphas| * numIteracoes / tamBloco)
+- **Total: O(k * (n² + nm)) + overhead de aprendizado**
+
+## 8. Validação da Implementação
+
+### Checklist de requisitos atendidos:
+
+✓ TAD Grafo com lista de adjacências
+✓ Geração de semente baseada em data/hora
+✓ Impressão da semente
+✓ Possibilidade de informar semente como parâmetro
+✓ Leitura de arquivo em formato padrão
+✓ Algoritmo Guloso
+✓ Algoritmo GRASP com α e iterações como parâmetros
+✓ Algoritmo Reativo com α's, iterações e tamanho de bloco
+✓ Exportação para GraphEditor (csacademy.com)
+✓ Arquivo CSV com histórico de execuções
+✓ Documentação de uso (INSTRUCOES.txt)
+
+## 9. Como Testar
+
+1. **Compile:**
+   ```bash
+   g++ -std=c++11 -O3 -o coloracao main.cpp Grafo.cpp ColoracaoDefeituosa.cpp
+   ```
+
+2. **Teste com grafo de exemplo:**
+   ```bash
+   ./coloracao grafo_exemplo.txt 1 guloso
+   ```
+
+3. **Compare algoritmos:**
+   ```bash
+   ./coloracao grafo_exemplo.txt 1 guloso
+   ./coloracao grafo_exemplo.txt 1 grasp 0.5 50
+   ./coloracao grafo_exemplo.txt 1 reativo 50 10
+   ```
+
+4. **Analise resultados:**
+   ```bash
+   cat resultados.csv
+   ```
+
+5. **Visualize grafo:**
+   - Abra http://csacademy.com/app/grapheditor/
+   - Cole o conteúdo de grafo_exemplo.txt
+
+## 10. Possíveis Melhorias Futuras
+
+- **Busca Local:** Após construção gulosa, melhorar solução trocando cores
+- **Path Relinking:** Combinar soluções boas para gerar novas soluções
+- **Critérios alternativos:** Ordenar por outras métricas além do grau
+- **Paralelização:** Executar iterações em paralelo
+- **Memória adaptativa:** Lembrar melhores soluções parciais
+
+## Conclusão
+
+O código implementa todos os requisitos do trabalho de forma organizada e eficiente, com:
+- Estruturas de dados apropriadas
+- Algoritmos conforme especificação
+- Sistema completo de logging e reprodução de resultados
+- Interface flexível (interativa e linha de comando)
+- Documentação completa
+
+A implementação permite realizar experimentos, comparar algoritmos e analisar resultados de forma sistemática.
