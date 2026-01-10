@@ -3,6 +3,9 @@
 
 Write-Host "=== Compilando Coloracao Defeituosa ===" -ForegroundColor Green
 
+# Adiciona MSYS2 ao PATH temporariamente
+$env:Path += ";C:\msys64\mingw64\bin"
+
 $compiler = "g++"
 $flags = "-std=c++11 -O3 -Wall"
 $output = "coloracao.exe"
@@ -31,6 +34,12 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "=== Compilacao bem-sucedida! ===" -ForegroundColor Green
     Write-Host "Executavel: $output"
+    Write-Host ""
+    Write-Host "Para executar:" -ForegroundColor Cyan
+    Write-Host "  .\executar.ps1          # Modo interativo" -ForegroundColor White
+    Write-Host "  .\executar.ps1 guloso   # Algoritmo guloso" -ForegroundColor White
+    Write-Host "  .\executar.ps1 grasp    # Algoritmo GRASP" -ForegroundColor White
+    Write-Host "  .\executar.ps1 reativo  # Algoritmo Reativo" -ForegroundColor White
 } else {
     Write-Host ""
     Write-Host "=== Falha na compilacao ===" -ForegroundColor Red

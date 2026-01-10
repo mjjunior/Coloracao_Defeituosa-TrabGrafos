@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <set>
 
 // Construtor
 Grafo::Grafo(int n) {

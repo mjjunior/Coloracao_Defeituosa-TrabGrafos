@@ -1,0 +1,2 @@
+Data/Hora,Instancia,Algoritmo,Parametro_d,Alpha,NumIteracoes,TamanhoBloco,Semente,Tempo(s),NumCores,NumDeficiencias,AlphaMelhor,MediaIteracoes
+2026-01-10 18:25:56,exemplo,Guloso,1,-1.0000,0,0,1768080356,0.0000,2,3,-0.0100,0.0000

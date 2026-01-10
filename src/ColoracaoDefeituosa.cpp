@@ -292,47 +292,47 @@ Solucao ColoracaoDefeituosa::algoritmoReativo(int numIteracoes, int tamBloco) {
     auto fim = chrono::high_resolution_clock::now();
     melhorSol.tempoExecucao = chrono::duration<double>(fim - inicio).count();
     
-    // Imprime estatísticas dos alphas
-    cout << "\n=== Estatísticas dos Alphas ===" << endl;
+    // Imprime estatisticas dos alphas
+    cout << "\n=== Estatisticas dos Alphas ===" << endl;
     for (int i = 0; i < numAlphas; i++) {
         cout << "Alpha " << fixed << setprecision(2) << alphas[i] 
              << ": usado " << vezesUsado[i] << " vezes, ";
         if (vezesUsado[i] > 0) {
-            cout << "qualidade média = " << setprecision(2) 
+            cout << "qualidade media = " << setprecision(2) 
                  << (somaQualidades[i] / vezesUsado[i]) << endl;
         } else {
-            cout << "não foi usado" << endl;
+            cout << "nao foi usado" << endl;
         }
     }
     
     return melhorSol;
 }
 
-// Imprime solução
+// Imprime solucao
 void ColoracaoDefeituosa::imprimirSolucao(const Solucao& sol) {
-    cout << "\n=== SOLUÇÃO ===" << endl;
-    cout << "Número de cores: " << sol.numCores << endl;
-    cout << "Número de deficiências: " << sol.numDeficiencias << endl;
-    cout << "Tempo de execução: " << fixed << setprecision(4) << sol.tempoExecucao << " segundos" << endl;
+    cout << "\n=== SOLUCAO ===" << endl;
+    cout << "Numero de cores: " << sol.numCores << endl;
+    cout << "Numero de deficiencias: " << sol.numDeficiencias << endl;
+    cout << "Tempo de execucao: " << fixed << setprecision(4) << sol.tempoExecucao << " segundos" << endl;
     
     if (sol.alphaMelhor >= 0) {
-        cout << "Alpha da melhor solução: " << (sol.alphaMelhor / 100.0) << endl;
+        cout << "Alpha da melhor solucao: " << (sol.alphaMelhor / 100.0) << endl;
     }
     
     if (sol.mediaIteracoes > 0) {
-        cout << "Média de cores (todas iterações): " << fixed << setprecision(2) 
+        cout << "Media de cores (todas iteracoes): " << fixed << setprecision(2) 
              << sol.mediaIteracoes << endl;
     }
     
-    cout << "\nColoração dos vértices:" << endl;
+    cout << "\nColoracao dos vertices:" << endl;
     for (size_t i = 0; i < sol.cores.size(); i++) {
-        cout << "Vértice " << i << ": cor " << sol.cores[i] << endl;
+        cout << "Vertice " << i << ": cor " << sol.cores[i] << endl;
     }
     
     if (validarSolucao(sol)) {
-        cout << "\n✓ Solução válida!" << endl;
+        cout << "\n[OK] Solucao valida!" << endl;
     } else {
-        cout << "\n✗ Solução inválida!" << endl;
+        cout << "\n[ERRO] Solucao invalida!" << endl;
     }
 }
 
@@ -359,7 +359,7 @@ void ColoracaoDefeituosa::exportarSolucaoGraphEditor(const Solucao& sol, const s
     }
     
     arquivo.close();
-    cout << "Solução exportada para " << nomeArquivo << " (formato GraphEditor)" << endl;
+    cout << "Solucao exportada para " << nomeArquivo << " (formato GraphEditor)" << endl;
 }
 
 // Salva resultado em arquivo CSV
