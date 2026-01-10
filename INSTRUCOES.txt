@@ -1,0 +1,184 @@
+# Coloração Defeituosa - Trabalho de Grafos
+
+## Descrição
+
+Implementação de algoritmos para o problema de Coloração Defeituosa (Defective Coloring), onde o objetivo é minimizar o número de cores utilizadas permitindo que vértices adjacentes tenham a mesma cor, desde que cada vértice não exceda `d` deficiências (vizinhos com a mesma cor).
+
+## Autores
+
+[Nome dos Autores]
+
+## Algoritmos Implementados
+
+1. **Algoritmo Guloso**: Colore vértices por ordem de grau decrescente
+2. **Algoritmo GRASP (Guloso Randomizado)**: Usa Lista Restrita de Candidatos com parâmetro α
+3. **Algoritmo GRASP Reativo**: Ajusta automaticamente as probabilidades de diferentes valores de α
+
+## Compilação (Linux)
+
+```bash
+cd src
+g++ -std=c++11 -O3 -o coloracao main.cpp Grafo.cpp ColoracaoDefeituosa.cpp
+```
+
+## Compilação (Windows)
+
+```powershell
+cd src
+g++ -std=c++11 -O3 -o coloracao.exe main.cpp Grafo.cpp ColoracaoDefeituosa.cpp
+```
+
+## Formato do Arquivo de Instância
+
+O arquivo de instância deve ter o seguinte formato:
+
+```
+<numero_vertices>
+<numero_arestas>
+<vertice_u> <vertice_v>
+<vertice_u> <vertice_v>
+...
+```
+
+**Exemplo** (grafo.txt):
+```
+6
+8
+0 1
+0 2
+1 2
+1 3
+2 3
+3 4
+3 5
+4 5
+```
+
+## Execução
+
+### Modo Interativo
+
+Execute o programa sem argumentos para usar o modo interativo com um grafo de exemplo:
+
+```bash
+./coloracao
+```
+
+### Modo Linha de Comando
+
+#### Algoritmo Guloso
+
+```bash
+./coloracao <instancia> <d> guloso
+```
+
+**Exemplo:**
+```bash
+./coloracao grafo.txt 1 guloso
+```
+
+#### Algoritmo GRASP
+
+```bash
+./coloracao <instancia> <d> grasp <alpha> <numIteracoes> [semente]
+```
+
+**Parâmetros:**
+- `alpha`: valor entre 0.0 e 1.0 (0.0 = totalmente guloso, 1.0 = totalmente aleatório)
+- `numIteracoes`: número de iterações a executar
+- `semente` (opcional): semente para gerador de números aleatórios
+
+**Exemplos:**
+```bash
+./coloracao grafo.txt 1 grasp 0.5 100
+./coloracao grafo.txt 1 grasp 0.3 200 12345
+```
+
+#### Algoritmo GRASP Reativo
+
+```bash
+./coloracao <instancia> <d> reativo <numIteracoes> <tamanhoBloco> [semente]
+```
+
+**Parâmetros:**
+- `numIteracoes`: número total de iterações
+- `tamanhoBloco`: a cada quantas iterações atualizar as probabilidades dos alphas
+- `semente` (opcional): semente para gerador de números aleatórios
+
+**Exemplos:**
+```bash
+./coloracao grafo.txt 1 reativo 100 10
+./coloracao grafo.txt 1 reativo 200 20 67890
+```
+
+## Saída
+
+O programa gera:
+
+1. **Saída na tela**: Informações sobre a execução e solução encontrada
+2. **Arquivo CSV**: `resultados.csv` com histórico de todas as execuções
+3. **Arquivo GraphEditor** (opcional): Formato compatível com http://csacademy.com/app/grapheditor/
+
+### Estrutura do CSV
+
+O arquivo `resultados.csv` contém as seguintes colunas:
+
+- `Data/Hora`: timestamp da execução
+- `Instancia`: nome do arquivo de instância
+- `Algoritmo`: algoritmo executado (Guloso, GRASP, Reativo)
+- `Parametro_d`: valor do parâmetro d
+- `Alpha`: valor de α usado (GRASP)
+- `NumIteracoes`: número de iterações executadas
+- `TamanhoBloco`: tamanho do bloco (Reativo)
+- `Semente`: semente de randomização usada
+- `Tempo(s)`: tempo de execução em segundos
+- `NumCores`: número de cores da solução
+- `NumDeficiencias`: número total de deficiências
+- `AlphaMelhor`: α que gerou a melhor solução (Reativo)
+- `MediaIteracoes`: média de cores em todas as iterações
+
+## Exemplo de Uso Completo
+
+```bash
+# Compilar
+g++ -std=c++11 -O3 -o coloracao main.cpp Grafo.cpp ColoracaoDefeituosa.cpp
+
+# Executar algoritmo guloso
+./coloracao grafo.txt 1 guloso
+
+# Executar GRASP com α=0.5 e 100 iterações
+./coloracao grafo.txt 1 grasp 0.5 100
+
+# Executar GRASP Reativo com 100 iterações e blocos de 10
+./coloracao grafo.txt 1 reativo 100 10
+
+# Visualizar resultados
+cat resultados.csv
+```
+
+## Instâncias de Teste
+
+Inclua aqui informações sobre onde encontrar instâncias de teste do problema ou como gerá-las.
+
+## Observações
+
+- O programa usa a semente baseada no relógio do sistema por padrão
+- A semente é impressa para permitir reproduzir resultados
+- Todos os resultados são salvos automaticamente em `resultados.csv`
+- O formato de saída GraphEditor permite visualizar o grafo online
+
+## Estrutura do Projeto
+
+```
+src/
+├── Grafo.h              # Interface do TAD Grafo
+├── Grafo.cpp            # Implementação do TAD Grafo
+├── ColoracaoDefeituosa.h   # Interface dos algoritmos
+├── ColoracaoDefeituosa.cpp # Implementação dos algoritmos
+└── main.cpp             # Programa principal
+```
+
+## Referências
+
+- Especificação do trabalho: DCC059_Especificacao_Trab2.pdf
+- GraphEditor: http://csacademy.com/app/grapheditor/
